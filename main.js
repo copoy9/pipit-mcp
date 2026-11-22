@@ -130,11 +130,13 @@ Point an MCP client at this URL using the Streamable HTTP transport.</p>
 
 async function handler(request) {
   const url = new URL(request.url);
+  // Any POST is an MCP call, whatever path the host mounts this at
+  // ("/mcp" on Deno/Render, "/api/mcp" on Vercel).
+  if (request.method === "POST" || request.method === "DELETE") return handleMcp(request);
   if (url.pathname === "/" || url.pathname === "") {
-    if (request.method === "POST") return handleMcp(request);
     return new Response(HOME_HTML, { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
-  if (url.pathname === "/mcp") return handleMcp(request);
+  if (url.pathname.endsWith("/mcp")) return handleMcp(request);
   return new Response("Not Found", { status: 404 });
 }
 
